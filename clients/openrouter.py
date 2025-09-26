@@ -190,6 +190,7 @@ if __name__ == "__main__":
             exit(1)
 
     # Skip completed problems if requested
+    completed_problems = None
     if args.skip_completed:
         completed_problems = get_completed_problems(
             Path("aiopslab/data/results"), agent_name, model
@@ -205,9 +206,18 @@ if __name__ == "__main__":
             exit(0)
 
     print(f"Running {len(problems)} problems with model: {model}")
+    
+    from typing import List
 
-    for pid in problems:
+    def read_lines_without_newline(filepath: str) -> list[str]:
+        """Read all lines from a file, stripping trailing newlines."""
+        with open(filepath, "r", encoding="utf-8") as f:
+            return [line.rstrip("\n") for line in f]
+    for pid in read_lines_without_newline("problems"):
         print(f"\n=== Starting problem: {pid} ===")
+        if completed_problems and pid in completed_problems:
+            print(f"Skip completed")
+            continue
         agent = OpenRouterAgent(model=model)
 
         orchestrator = Orchestrator(results_dir=results_dir)

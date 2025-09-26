@@ -125,14 +125,16 @@ class Prometheus:
         return True
 
     def _is_prometheus_running(self) -> bool:
-        """Check if Prometheus is already running in the cluster."""
-        command = (
-            f"kubectl get pods -n {self.namespace} -l app.kubernetes.io/name=prometheus"
-        )
+        """Check if Prometheus Helm release is deployed."""
         try:
-            result = KubeCtl().exec_command(command)
-            if "Running" in result:
-                return True
-        except CalledProcessError:
+            status_output = Helm.status(**self.helm_configs)
+            for line in status_output.splitlines():
+                if line.strip().startswith("STATUS:"):
+                    status_value = line.split(":", 1)[1].strip().lower()
+                    print("prom status: ", status_value)
+                    return status_value == "deployed"
+            print("prom all line")
             return False
-        return False
+        except Exception as e:
+            print("prom  Execption ", e)
+            return False

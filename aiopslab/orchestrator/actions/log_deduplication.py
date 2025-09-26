@@ -116,8 +116,10 @@ def greedy_compress_lines(
         return raw_str
     lines = raw_str.splitlines()
     result = lines[:]
+    print("Before compress: ", len(result))
     for size in range(1, window_size + 1):
         result = greedy_compress_pass(result, ts_rx, size)
+        print(f"After compress: {size}", len(result))
     return "\n".join(result)
 
 # -------------------------------
